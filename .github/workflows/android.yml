@@ -37,9 +37,6 @@ jobs:
           CI: true
         continue-on-error: true
 
-      - name: Save Current SHA for Next Run
-        run: echo ${{ github.sha }} > last_sha.txt
-
       - name: Build Beta APK
         run: ./gradlew assembleBetaModernRelease
 
