@@ -1,4 +1,4 @@
-name: Artifact Build 
+name: Artifact Build
 
 on:
   push:
@@ -83,30 +83,42 @@ jobs:
       env:
         BUILD_TOOLS_VERSION: "34.0.0"
 
-    - name: Upload Beta APK
-      uses: actions/upload-artifact@v4
-      with:
-        name: "Beta APK"
-        retention-days: 90
-        path: "app/build/outputs/apk/betaModern/release/app-beta-modern-release-signed.apk"
+    - name: Get Commit Messages
+      id: commit_message
+      run: |
+        commits=$(git log -1 --pretty=format:"commit %H by %an%nMessage: %s" $GITHUB_SHA)
+        echo "::set-output name=commits::$commits"
 
-    - name: Upload Production APK
-      uses: actions/upload-artifact@v4
-      with:
-        name: "Production APK"
-        retention-days: 90
-        path: "app/build/outputs/apk/prodModern/release/app-prod-modern-release-signed.apk"
+    - name: Send Beta APK to Telegram
+      if: always()
+      run: |
+        curl -F document=@app/build/outputs/apk/betaModern/release/app-beta-modern-release.apk \
+             -F chat_id=${{ secrets.TELEGRAM_CHAT_ID }} \
+             -F caption="$(echo -e "New Beta APK\nCommits:\n${{ steps.commit_message.outputs.commits }}")" \
+             https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendDocument
 
-    - name: Upload Legacy Beta APK
-      uses: actions/upload-artifact@v4
-      with:
-        name: "Legacy Beta APK"
-        retention-days: 90
-        path: "app/build/outputs/apk/betaLegacy/release/app-beta-legacy-release-signed.apk"
+    - name: Send Legacy Beta APK to Telegram
+      if: always()
+      run: |
+        curl -F document=@app/build/outputs/apk/betaLegacy/release/app-beta-legacy-release.apk \
+             -F chat_id=${{ secrets.TELEGRAM_CHAT_ID }} \
+             -F caption="$(echo -e "Awery update\nCommits:\n${{ steps.commit_message.outputs.commits }}")" \
+             https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendDocument
 
-    - name: Upload Legacy Production APK
-      uses: actions/upload-artifact@v4
-      with:
-        name: "Legacy Production APK"
-        retention-days: 90
-        path: "app/build/outputs/apk/prodLegacy/release/app-prod-legacy-release-signed.apk"
+    - name: Send Beta APK to Discord
+      if: always()
+      run: |
+        commit_messages=$(echo -e "${{ steps.commit_message.outputs.commits }}")
+        payload="{\"content\": \"Awery update\nCommits:\n$commit_messages\"}"
+        curl -F "payload_json=$payload" \
+             -F "file1=@app/build/outputs/apk/betaModern/release/app-beta-modern-release.apk" \
+             ${{ secrets.DISCORD_WEBHOOK_URL }}
+
+    - name: Send Legacy Beta APK to Discord
+      if: always()
+      run: |
+        commit_messages=$(echo -e "${{ steps.commit_message.outputs.commits }}")
+        payload="{\"content\": \"Awery update\nCommits:\n$commit_messages\"}"
+        curl -F "payload_json=$payload" \
+             -F "file1=@app/build/outputs/apk/betaLegacy/release/app-beta-legacy-release.apk" \
+             ${{ secrets.DISCORD_WEBHOOK_URL }}
