@@ -134,7 +134,8 @@ jobs:
         run: |
           curl -F document=@app/build/outputs/apk/betaModern/release/app-beta-modern-release-signed.apk \
           -F chat_id=${{ secrets.TELEGRAM_CHAT_ID }} \
-          -F caption="Alpha Release $(cat commit_log.txt)" \
+          -F caption="Alpha Release 
+            $(cat commit_log.txt)" \ 
            https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendDocument
 
       - name: Send Legacy Beta APK to Telegram
