@@ -75,7 +75,7 @@ jobs:
         run: |
           commit_id=$(echo "${{ github.sha }}" | cut -c1-7)
           author_name=$(git log -1 --pretty=format:'%an')
-          author_link="[$author_name](https://github.com/${author_name}/commit/${{ github.sha }})"
+          author_link="[$author_name](https://github.com/${author_name})"
           payload=$(jq -nc --arg content "<@&1246876742568644720> 
           **Commit:** [${commit_id}](https://github.com/${{ github.repository }}/commit/${{ github.sha }}) by ${author_link} 
           **Message:** $(cat commit_log.txt)" '{content: $content}')
