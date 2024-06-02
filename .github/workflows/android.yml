@@ -73,8 +73,5 @@ jobs:
 
     - name: Send Legacy Beta APK to Discord
       run: |
-        commit_messages=$(echo -e "${{ steps.commit_message.outputs.commits }}")
-        payload="{\"content\": \"Awery update\nCommits:\n$commit_messages\"}"
-        curl -F "payload_json=$payload" \
              -F "file1=@app/build/outputs/apk/betaLegacy/release/app-beta-legacy-release.apk" \
              ${{ secrets.DISCORD_WEBHOOK_URL }}
