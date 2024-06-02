@@ -94,10 +94,13 @@ jobs:
       - name: Send Beta APK to Discord
         if: always()
         run: |
-          payload=$(jq -nc --arg content "<@&1246876742568644720>\nCommit ID: [${{ github.sha }}](https://github.com/${{ github.repository }}/commit/${{ github.sha }})\nMessage: $(cat commit_log.txt)" '{content: $content}')
+          commit_id=$(echo "${{ github.sha }}" | cut -c1-7)
+          payload=$(jq -nc --arg content "<@&1246876742568644720> 
+          **Commit:** [${commit_id}](https://github.com/${{ github.repository }}/commit/${{ github.sha }}) **Message:** $(cat commit_log.txt)" '{content: $content}')
           curl -F "payload_json=$payload" \
-               -F "file1=@app/build/outputs/apk/betaModern/release/app-beta-modern-release.apk" \
-               ${{ secrets.DISCORD_WEBHOOK_URL }}
+           -F "file1=@app/build/outputs/apk/betaModern/release/app-beta-modern-release.apk" \
+           ${{ secrets.DISCORD_WEBHOOK_URL }}
+
 
       - name: Send Legacy Beta APK to Discord
         if: always()
