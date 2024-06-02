@@ -35,66 +35,14 @@ jobs:
       - name: Build Legacy Production APK
         run: ./gradlew assembleProdLegacyRelease
 
-      - name: Sign Beta APK
-        uses: r0adkll/sign-android-release@v1
-        id: sign_beta
-        with:
-          releaseDirectory: "app/build/outputs/apk/betaModern/release"
-          signingKeyBase64: ${{ secrets.ANDROID_SIGNING_KEY }}
-          alias: ${{ secrets.ANDROID_KEY_ALIAS }}
-          keyStorePassword: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
-          keyPassword: ${{ secrets.ANDROID_KEY_PASSWORD }}
-        env:
-          BUILD_TOOLS_VERSION: "34.0.0"
-
-      - name: Sign Production APK
-        uses: r0adkll/sign-android-release@v1
-        id: sign_prod
-        with:
-          releaseDirectory: "app/build/outputs/apk/prodModern/release"
-          signingKeyBase64: ${{ secrets.ANDROID_SIGNING_KEY }}
-          alias: ${{ secrets.ANDROID_KEY_ALIAS }}
-          keyStorePassword: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
-          keyPassword: ${{ secrets.ANDROID_KEY_PASSWORD }}
-        env:
-          BUILD_TOOLS_VERSION: "34.0.0"
-
-      - name: Sign Legacy Beta APK
-        uses: r0adkll/sign-android-release@v1
-        id: sign_beta_legacy
-        with:
-          releaseDirectory: "app/build/outputs/apk/betaLegacy/release"
-          signingKeyBase64: ${{ secrets.ANDROID_SIGNING_KEY }}
-          alias: ${{ secrets.ANDROID_KEY_ALIAS }}
-          keyStorePassword: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
-          keyPassword: ${{ secrets.ANDROID_KEY_PASSWORD }}
-        env:
-          BUILD_TOOLS_VERSION: "34.0.0"
-
-      - name: Sign Legacy Production APK
-        uses: r0adkll/sign-android-release@v1
-        id: sign_prod_legacy
-        with:
-          releaseDirectory: "app/build/outputs/apk/prodLegacy/release"
-          signingKeyBase64: ${{ secrets.ANDROID_SIGNING_KEY }}
-          alias: ${{ secrets.ANDROID_KEY_ALIAS }}
-          keyStorePassword: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
-          keyPassword: ${{ secrets.ANDROID_KEY_PASSWORD }}
-        env:
-          BUILD_TOOLS_VERSION: "34.0.0"
-
       - name: Get Commit Messages
         id: commit_message
         run: |
           REPO_URL="https://github.com/${{ github.repository }}"
-          commit_id=$(git log -1 --pretty=format:"%h")
+          commit_id=$(git log -1 --pretty=format:"[%h]($REPO_URL/commit/%H)")
           author=$(git log -1 --pretty=format:"%an")
-          author_email=$(git log -1 --pretty=format:"%ae")
-          author_username=$(curl -s "https://api.github.com/search/users?q=${author_email}" | jq -r '.items[0].login')
-          author_profile="https://github.com/$author_username"
-          commit_link="[Commit]($REPO_URL/commit/$(git log -1 --pretty=format:"%H"))"
-          message=$(git log -1 --pretty=format:"%s")
-          COMMIT="Commit: $commit_id $commit_link by [$author]($author_profile)\nMessage: $message"
+          author_profile="https://github.com/$author"
+          COMMIT="Commit: $commit_id by [$author]($author_profile)"
           echo "::set-output name=Commit::$COMMIT"
 
       - name: Send Beta APK to Telegram
