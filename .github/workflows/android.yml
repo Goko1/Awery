@@ -49,16 +49,16 @@ jobs:
       - name: Send Beta APK to Telegram
         if: always()
         run: |
-         commit_message="${{ steps.commit_message.outputs.Commit }}"
-         commit_message="${commit_message// /%20}" # Replace spaces with %20 for URL
-         commit_message="${commit_message//$'\n'/}" # Remove newlines
-         commit_message="${commit_message//$'\r'/}" # Remove carriage returns
-         commit_url=$(echo "$commit_message" | grep -o '\[.*\]' | tr -d '[]')
-         caption="{{ secrets.TELEGRAM_ROLE_ID }}\n[Commit Details]($commit_url)"
-         curl -F document=@app/build/outputs/apk/betaModern/release/app-beta-modern-release.apk \
-         -F chat_id=${{ secrets.TELEGRAM_CHAT_ID }} \
-         -F caption="$caption" \
-         https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendDocument
+          commit_message="${{ steps.commit_message.outputs.Commit }}"
+          commit_message="${commit_message// /%20}" # Replace spaces with %20 for URL
+          commit_message="${commit_message//$'\n'/}" # Remove newlines
+          commit_message="${commit_message//$'\r'/}" # Remove carriage returns
+          commit_url=$(echo "$commit_message" | grep -o '\[.*\]' | tr -d '[]')
+          caption="[Commit Details]($commit_url)"
+          curl -F document=@app/build/outputs/apk/betaModern/release/app-beta-modern-release.apk \
+               -F chat_id=${{ secrets.TELEGRAM_CHAT_ID }} \
+               -F caption="$caption" \
+               https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendDocument
 
       - name: Send Legacy Beta APK to Telegram
         if: always()
@@ -70,7 +70,8 @@ jobs:
       - name: Send Beta APK to Discord
         if: always()
         run: |
-          commit_messages=$(echo -e "${{ steps.commit_message.outputs.Commit }}")
+          commit_messages="${{ steps.commit_message.outputs.Commit }}"
+          commit_messages="${commit_messages//$'\n'/\\n}" # Replace newlines with \n for Discord
           payload=$(jq -nc --arg content "<@&1246876742568644720>\n$commit_messages" '{content: $content}')
           curl -F "payload_json=$payload" \
                -F "file1=@app/build/outputs/apk/betaModern/release/app-beta-modern-release.apk" \
