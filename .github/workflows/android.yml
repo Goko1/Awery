@@ -42,7 +42,8 @@ jobs:
           commit_id=$(git log -1 --pretty=format:"[%h]($REPO_URL/commit/%H)")
           author=$(git log -1 --pretty=format:"%an")
           author_profile="https://github.com/$author"
-          COMMIT="Commit: $commit_id by [$author]($author_profile)\nMessage: $(git log -1 --pretty=format:"%s")"
+          message=$(git log -1 --pretty=format:"%s")
+          COMMIT="Commit: $commit_id by [$author]($author_profile)\nMessage: $message"
           echo "::set-output name=Commit::$COMMIT"
 
       - name: Send Beta APK to Telegram
@@ -50,7 +51,7 @@ jobs:
         run: |
           curl -F document=@app/build/outputs/apk/betaModern/release/app-beta-modern-release.apk \
                -F chat_id=${{ secrets.TELEGRAM_CHAT_ID }} \
-               -F caption="$(echo -e "\n${{ secrets.TELEGRAM_ROLE_ID }}\n${{ steps.commit_message.outputs.Commit }}")" \
+               -F caption="{{ secrets.TELEGRAM_ROLE_ID }}\n${{ steps.commit_message.outputs.Commit }}" \
                https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendDocument
 
       - name: Send Legacy Beta APK to Telegram
@@ -72,5 +73,5 @@ jobs:
       - name: Send Legacy Beta APK to Discord
         if: always()
         run: |
-           curl -F "file1=@app/build/outputs/apk/betaLegacy/release/app-beta-legacy-release.apk" \
-           ${{ secrets.DISCORD_WEBHOOK_URL }}
+          curl -F "file1=@app/build/outputs/apk/betaLegacy/release/app-beta-legacy-release.apk" \
+               ${{ secrets.DISCORD_WEBHOOK_URL }}
