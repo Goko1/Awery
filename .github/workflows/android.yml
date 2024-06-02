@@ -30,7 +30,6 @@ jobs:
           COMMIT_LOG="${COMMIT_LOG//'%'/'%25'}"
           COMMIT_LOG="${COMMIT_LOG//$'\n'/'%0A'}"
           COMMIT_LOG="${COMMIT_LOG//$'\r'/'%0D'}"
-          COMMIT_LOG=$(echo "$COMMIT_LOG" | sed 's/%0A/\n/g; s/^/\n/')
           echo "COMMIT_LOG=${COMMIT_LOG}" >> $GITHUB_ENV
           echo "$COMMIT_LOG" > commit_log.txt
         shell: bash
@@ -125,13 +124,15 @@ jobs:
           name: "Legacy Production APK"
           retention-days: 90
           path: "app/build/outputs/apk/prodLegacy/release/app-prod-legacy-release-signed.apk"
-
+          
       - name: Send Beta APK to Telegram
         if: always()
         run: |
+          COMMIT_LOG=$(cat commit_log.txt)
+          COMMIT_LOG=$(echo "$COMMIT_LOG" | sed 's/%0A/\n/g; s/^/\n/')
           curl -F document=@app/build/outputs/apk/betaModern/release/app-beta-modern-release-signed.apk \
           -F chat_id=${{ secrets.TELEGRAM_CHAT_ID }} \
-          -F caption="Alpha Release $(cat commit_log.txt)" \
+          -F caption="Alpha Release $COMMIT_LOG" \
           https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendDocument
 
       - name: Send Legacy Beta APK to Telegram
