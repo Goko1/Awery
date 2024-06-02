@@ -32,7 +32,7 @@ jobs:
           COMMIT_LOG="${COMMIT_LOG//$'\r'/'%0D'}"
           echo "COMMIT_LOG=${COMMIT_LOG}" >> $GITHUB_ENV
           echo "$COMMIT_LOG" > commit_log.txt
-          shell: /usr/bin/bash -e {0}
+        shell: bash
         env:
           CI: true
         continue-on-error: true
@@ -49,33 +49,81 @@ jobs:
       - name: Build Legacy Production APK
         run: ./gradlew assembleProdLegacyRelease
 
+      - name: Sign Beta APK
+        uses: r0adkll/sign-android-release@v1
+        id: sign_beta
+        with:
+          releaseDirectory: "app/build/outputs/apk/betaModern/release"
+          signingKeyBase64: ${{ secrets.ANDROID_SIGNING_KEY }}
+          alias: ${{ secrets.ANDROID_KEY_ALIAS }}
+          keyStorePassword: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          keyPassword: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        env:
+          BUILD_TOOLS_VERSION: "34.0.0"
+
+      - name: Sign Production APK
+        uses: r0adkll/sign-android-release@v1
+        id: sign_prod
+        with:
+          releaseDirectory: "app/build/outputs/apk/prodModern/release"
+          signingKeyBase64: ${{ secrets.ANDROID_SIGNING_KEY }}
+          alias: ${{ secrets.ANDROID_KEY_ALIAS }}
+          keyStorePassword: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          keyPassword: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        env:
+          BUILD_TOOLS_VERSION: "34.0.0"
+
+      - name: Sign Legacy Beta APK
+        uses: r0adkll/sign-android-release@v1
+        id: sign_beta_legacy
+        with:
+          releaseDirectory: "app/build/outputs/apk/betaLegacy/release"
+          signingKeyBase64: ${{ secrets.ANDROID_SIGNING_KEY }}
+          alias: ${{ secrets.ANDROID_KEY_ALIAS }}
+          keyStorePassword: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          keyPassword: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        env:
+          BUILD_TOOLS_VERSION: "34.0.0"
+
+      - name: Sign Legacy Production APK
+        uses: r0adkll/sign-android-release@v1
+        id: sign_prod_legacy
+        with:
+          releaseDirectory: "app/build/outputs/apk/prodLegacy/release"
+          signingKeyBase64: ${{ secrets.ANDROID_SIGNING_KEY }}
+          alias: ${{ secrets.ANDROID_KEY_ALIAS }}
+          keyStorePassword: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          keyPassword: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        env:
+          BUILD_TOOLS_VERSION: "34.0.0"
+
       - name: Upload Beta APK
         uses: actions/upload-artifact@v4
         with:
-         name: "Beta APK"
-         retention-days: 90
-         path: "app/build/outputs/apk/betaModern/release/app-beta-modern-release-signed.apk"
+          name: "Beta APK"
+          retention-days: 90
+          path: "app/build/outputs/apk/betaModern/release/app-beta-modern-release-signed.apk"
 
       - name: Upload Production APK
         uses: actions/upload-artifact@v4
         with:
-         name: "Production APK"
-         retention-days: 90
-         path: "app/build/outputs/apk/prodModern/release/app-prod-modern-release-signed.apk"
+          name: "Production APK"
+          retention-days: 90
+          path: "app/build/outputs/apk/prodModern/release/app-prod-modern-release-signed.apk"
 
       - name: Upload Legacy Beta APK
         uses: actions/upload-artifact@v4
         with:
-         name: "Legacy Beta APK"
-         retention-days: 90
-         path: "app/build/outputs/apk/betaLegacy/release/app-beta-legacy-release-signed.apk"
+          name: "Legacy Beta APK"
+          retention-days: 90
+          path: "app/build/outputs/apk/betaLegacy/release/app-beta-legacy-release-signed.apk"
 
       - name: Upload Legacy Production APK
         uses: actions/upload-artifact@v4
         with:
-         name: "Legacy Production APK"
-         retention-days: 90
-         path: "app/build/outputs/apk/prodLegacy/release/app-prod-legacy-release-signed.apk"
+          name: "Legacy Production APK"
+          retention-days: 90
+          path: "app/build/outputs/apk/prodLegacy/release/app-prod-legacy-release-signed.apk"
 
       - name: Send Beta APK to Telegram
         if: always()
@@ -99,7 +147,7 @@ jobs:
           author_name=$(git log -1 --pretty=format:'%an')
           author_link="[$author_name](https://github.com/${author_name})"
           payload=$(jq -nc --arg content "<@&1246876742568644720> 
-          **Commit:** [${commit_id}](https://github.com/${{ github.repository }}/commit/${{ github.sha }}) by ${author_link} 
+          **Commit:** [${commit_id}](https://github.com/${author_name}/commit/${{ github.sha }}) by ${author_link} 
           **Message:** $(cat commit_log.txt)" '{content: $content}')
           curl -F "payload_json=$payload" \
            -F "file1=@app/build/outputs/apk/betaModern/release/app-beta-modern-release-signed.apk" \
