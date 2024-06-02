@@ -2,9 +2,9 @@ name: Artifact Build
 
 on:
   push:
-    branches: [master]
+    branches: [ master ]
   pull_request:
-    branches: [master]
+    branches: [ master ]
 
 jobs:
   build:
@@ -23,15 +23,74 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      # Steps for building and signing APKs (omitted for brevity)
+      - name: Build Beta APK
+        run: ./gradlew assembleBetaModernRelease
 
+      - name: Build Production APK
+        run: ./gradlew assembleProdModernRelease
+
+      - name: Build Legacy Beta APK
+        run: ./gradlew assembleBetaLegacyRelease
+
+      - name: Build Legacy Production APK
+        run: ./gradlew assembleProdLegacyRelease
+
+      - name: Sign Beta APK
+        uses: r0adkll/sign-android-release@v1
+        id: sign_beta
+        with:
+          releaseDirectory: "app/build/outputs/apk/betaModern/release"
+          signingKeyBase64: ${{ secrets.ANDROID_SIGNING_KEY }}
+          alias: ${{ secrets.ANDROID_KEY_ALIAS }}
+          keyStorePassword: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          keyPassword: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        env:
+          BUILD_TOOLS_VERSION: "34.0.0"
+
+      - name: Sign Production APK
+        uses: r0adkll/sign-android-release@v1
+        id: sign_prod
+        with:
+          releaseDirectory: "app/build/outputs/apk/prodModern/release"
+          signingKeyBase64: ${{ secrets.ANDROID_SIGNING_KEY }}
+          alias: ${{ secrets.ANDROID_KEY_ALIAS }}
+          keyStorePassword: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          keyPassword: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        env:
+          BUILD_TOOLS_VERSION: "34.0.0"
+
+      - name: Sign Legacy Beta APK
+        uses: r0adkll/sign-android-release@v1
+        id: sign_beta_legacy
+        with:
+          releaseDirectory: "app/build/outputs/apk/betaLegacy/release"
+          signingKeyBase64: ${{ secrets.ANDROID_SIGNING_KEY }}
+          alias: ${{ secrets.ANDROID_KEY_ALIAS }}
+          keyStorePassword: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          keyPassword: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        env:
+          BUILD_TOOLS_VERSION: "34.0.0"
+
+      - name: Sign Legacy Production APK
+        uses: r0adkll/sign-android-release@v1
+        id: sign_prod_legacy
+        with:
+          releaseDirectory: "app/build/outputs/apk/prodLegacy/release"
+          signingKeyBase64: ${{ secrets.ANDROID_SIGNING_KEY }}
+          alias: ${{ secrets.ANDROID_KEY_ALIAS }}
+          keyStorePassword: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          keyPassword: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        env:
+          BUILD_TOOLS_VERSION: "34.0.0"
+          
       - name: Get Commit Messages
         id: commit_message
         run: |
           commit_id=$(git log -1 --pretty=format:"%h")
           author=$(git log -1 --pretty=format:"[%an](https://github.com/%ae)")
+          commit_link=$(git log -1 --pretty=format:"[Commit](https://github.com/USERNAME/REPOSITORY/commit/%H)")
           message=$(git log -1 --pretty=format:"%s")
-          COMMIT=" $commit_id by $author\nMessage: $message"
+          COMMIT="Commit: $commit_id $commit_link by $author\nMessage: $message"
           echo "::set-output name=Commit::$COMMIT"
 
       - name: Send Beta APK to Telegram
@@ -39,7 +98,7 @@ jobs:
         run: |
           curl -F document=@app/build/outputs/apk/betaModern/release/app-beta-modern-release.apk \
                -F chat_id=${{ secrets.TELEGRAM_CHAT_ID }} \
-               -F caption="$(echo -e "\nCommits:\n${{ steps.commit_message.outputs.Commit }}")" \
+               -F caption="$(echo -e "\n${{ secrets.TELEGRAM_ROLE_ID }}\n${{ steps.commit_message.outputs.Commit }}")" \
                https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendDocument
 
       - name: Send Legacy Beta APK to Telegram
@@ -47,14 +106,14 @@ jobs:
         run: |
           curl -F document=@app/build/outputs/apk/betaLegacy/release/app-beta-legacy-release.apk \
                -F chat_id=${{ secrets.TELEGRAM_CHAT_ID }} \
-               -F caption="$(echo -e "\nCommits:\n${{ steps.commit_message.outputs.Commit }}")" \
+               -F caption="$(echo -e "\n${{ secrets.TELEGRAM_ROLE_ID }}\n${{ steps.commit_message.outputs.Commit }}")" \
                https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendDocument
 
       - name: Send Beta APK to Discord
         if: always()
         run: |
           commit_messages=$(echo -e "${{ steps.commit_message.outputs.Commit }}")
-          payload="{\"content\": \"<@&1246876742568644720>\nCommits:\n$commit_messages\"}" # Replace YOUR_ROLE_ID with the actual role ID
+          payload="{\"content\": \"<@&${{ secrets.DISCORD_ROLE_ID }}>\n${commit_messages}\"}"
           curl -F "payload_json=$payload" \
                -F "file1=@app/build/outputs/apk/betaModern/release/app-beta-modern-release.apk" \
                ${{ secrets.DISCORD_WEBHOOK_URL }}
@@ -63,7 +122,7 @@ jobs:
         if: always()
         run: |
           commit_messages=$(echo -e "${{ steps.commit_message.outputs.Commit }}")
-          payload="{\"content\": \"<@&1246876742568644720>\nCommits:\n$commit_messages\"}" # Replace YOUR_ROLE_ID with the actual role ID
+          payload="{\"content\": \"<@&${{ secrets.DISCORD_ROLE_ID }}>\n${commit_messages}\"}"
           curl -F "payload_json=$payload" \
                -F "file1=@app/build/outputs/apk/betaLegacy/release/app-beta-legacy-release.apk" \
                ${{ secrets.DISCORD_WEBHOOK_URL }}
