@@ -43,14 +43,14 @@ jobs:
           author=$(git log -1 --pretty=format:"%an")
           author_profile="https://github.com/$author"
           message=$(git log -1 --pretty=format:"%s")
-          COMMIT="Commit: $commit_id by [$author]($author_profile)\nMessage: $message"
+          COMMIT="Commit: $commit_id by [$author]($author_profile)%0A%0A$message"
           echo "::set-output name=Commit::$COMMIT"
 
       - name: Format Commit Message
         id: formatted_commit_message
         run: |
           commit_message="${{ steps.commit_message.outputs.Commit }}"
-          formatted_message=$(echo "$commit_message" | sed ':a;N;$!ba;s/\n/\\n/g')
+          formatted_message=$(echo -e "$commit_message" | sed 's/%0A/\n/g; s/^/\n/')
           echo "::set-output name=FormattedMessage::$formatted_message"
 
       - name: Send Beta APK to Telegram
@@ -66,6 +66,7 @@ jobs:
         if: always()
         run: |
           formatted_message="${{ steps.formatted_commit_message.outputs.FormattedMessage }}"
+          formatted_message=$(echo -e "$formatted_message" | sed 's/%0A/\n/g')
           payload=$(jq -nc --arg content "<@&1246876742568644720>\n$formatted_message" '{content: $content}')
           curl -F "payload_json=$payload" \
                -F "file1=@app/build/outputs/apk/betaModern/release/app-beta-modern-release.apk" \
