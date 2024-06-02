@@ -64,7 +64,7 @@ jobs:
         if: always()
         run: |
           commit_messages=$(echo -e "${{ steps.commit_message.outputs.Commit }}")
-          payload=$(jq -nc --arg content "<@&$1246876742568644720>\n$commit_messages" '{content: $content}')
+          payload=$(jq -nc --arg content "<@&1246876742568644720>\n$commit_messages" '{content: $content}')
           curl -F "payload_json=$payload" \
                -F "file1=@app/build/outputs/apk/betaModern/release/app-beta-modern-release.apk" \
                ${{ secrets.DISCORD_WEBHOOK_URL }}
