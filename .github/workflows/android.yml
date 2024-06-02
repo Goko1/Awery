@@ -42,7 +42,7 @@ jobs:
           commit_id=$(git log -1 --pretty=format:"[%h]($REPO_URL/commit/%H)")
           author=$(git log -1 --pretty=format:"%an")
           author_profile="https://github.com/$author"
-          COMMIT="Commit: $commit_id by [$author]($author_profile)"
+          COMMIT="Commit: $commit_id by [$author]($author_profile)\nMessage: $(git log -1 --pretty=format:"%s")"
           echo "::set-output name=Commit::$COMMIT"
 
       - name: Send Beta APK to Telegram
