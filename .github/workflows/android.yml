@@ -67,9 +67,8 @@ jobs:
                -F chat_id=${{ secrets.TELEGRAM_CHAT_ID }} \
                https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendDocument
 
-      - name: Debug Commit Log
-        run: |
-          ls -l commit_log.txt && cat commit_log.txt || echo "Commit log file not found"
+      - name: Check File Location
+        run: ls -la app/build/outputs/apk/betaModern/release/
 
       - name: Send Beta APK to Discord
         if: always()
