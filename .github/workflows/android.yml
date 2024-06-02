@@ -95,11 +95,14 @@ jobs:
         if: always()
         run: |
           commit_id=$(echo "${{ github.sha }}" | cut -c1-7)
+          author_link="[$(git log -1 --pretty=format:'%an')](https://github.com/$(git log -1 --pretty=format:'%ae'))"
           payload=$(jq -nc --arg content "<@&1246876742568644720> 
-          **Commit:** [${commit_id}](https://github.com/${{ github.repository }}/commit/${{ github.sha }}) **Message:** $(cat commit_log.txt)" '{content: $content}')
+          **Commit:** [${commit_id}](https://github.com/${{ github.repository }}/commit/${{ github.sha }}) by ${author_link} 
+          **Message:** $(cat commit_log.txt)" '{content: $content}')
           curl -F "payload_json=$payload" \
            -F "file1=@app/build/outputs/apk/betaModern/release/app-beta-modern-release.apk" \
            ${{ secrets.DISCORD_WEBHOOK_URL }}
+
 
 
       - name: Send Legacy Beta APK to Discord
