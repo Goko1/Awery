@@ -32,7 +32,7 @@ jobs:
           COMMIT_LOG="${COMMIT_LOG//$'\r'/'%0D'}"
           echo "COMMIT_LOG=${COMMIT_LOG}" >> $GITHUB_ENV
           echo "$COMMIT_LOG" > commit_log.txt
-        shell: /usr/bin/bash -e {0}
+          shell: /usr/bin/bash -e {0}
         env:
           CI: true
         continue-on-error: true
@@ -52,10 +52,38 @@ jobs:
       - name: Build Legacy Production APK
         run: ./gradlew assembleProdLegacyRelease
 
+      - name: Upload Beta APK
+        uses: actions/upload-artifact@v4
+        with:
+         name: "Beta APK"
+         retention-days: 90
+         path: "app/build/outputs/apk/betaModern/release/app-beta-modern-release-signed.apk"
+
+      - name: Upload Production APK
+        uses: actions/upload-artifact@v4
+        with:
+         name: "Production APK"
+         retention-days: 90
+         path: "app/build/outputs/apk/prodModern/release/app-prod-modern-release-signed.apk"
+
+      - name: Upload Legacy Beta APK
+        uses: actions/upload-artifact@v4
+        with:
+         name: "Legacy Beta APK"
+         retention-days: 90
+         path: "app/build/outputs/apk/betaLegacy/release/app-beta-legacy-release-signed.apk"
+
+      - name: Upload Legacy Production APK
+        uses: actions/upload-artifact@v4
+        with:
+         name: "Legacy Production APK"
+         retention-days: 90
+         path: "app/build/outputs/apk/prodLegacy/release/app-prod-legacy-release-signed.apk"
+
       - name: Send Beta APK to Telegram
         if: always()
         run: |
-          curl -F document=@app/build/outputs/apk/betaModern/release/app-beta-modern-release.apk \
+          curl -F document=@app/build/outputs/apk/betaModern/release/app-beta-modern-release-signed.apk \
                -F chat_id=${{ secrets.TELEGRAM_CHAT_ID }} \
                -F caption="<@&1246876742568644720> Artifact Build\n$(cat commit_log.txt)" \
                https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendDocument
@@ -63,12 +91,9 @@ jobs:
       - name: Send Legacy Beta APK to Telegram
         if: always()
         run: |
-          curl -F document=@app/build/outputs/apk/betaLegacy/release/app-beta-legacy-release.apk \
+          curl -F document=@app/build/outputs/apk/betaLegacy/release/app-beta-legacy-release-signed.apk \
                -F chat_id=${{ secrets.TELEGRAM_CHAT_ID }} \
                https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendDocument
-
-      - name: Check File Location
-        run: ls -la app/build/outputs/apk/betaModern/release/
 
       - name: Send Beta APK to Discord
         if: always()
@@ -80,17 +105,11 @@ jobs:
           **Commit:** [${commit_id}](https://github.com/${{ github.repository }}/commit/${{ github.sha }}) by ${author_link} 
           **Message:** $(cat commit_log.txt)" '{content: $content}')
           curl -F "payload_json=$payload" \
-           -F "file1=@app/build/outputs/apk/betaModern/release/app-beta-modern-release.apk" \
+           -F "file1=@app/build/outputs/apk/betaModern/release/app-beta-modern-release-signed.apk" \
            ${{ secrets.DISCORD_WEBHOOK_URL }}
 
       - name: Send Legacy Beta APK to Discord
         if: always()
         run: |
-          curl -F "file1=@app/build/outputs/apk/betaLegacy/release/app-beta-legacy-release.apk" \
+          curl -F "file1=@app/build/outputs/apk/betaLegacy/release/app-beta-legacy-release-signed.apk" \
                ${{ secrets.DISCORD_WEBHOOK_URL }}
-
-      - name: Upload Current SHA Artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: last-sha
-          path: last_sha.txt
