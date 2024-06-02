@@ -11,7 +11,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
@@ -76,6 +77,7 @@ jobs:
         run: |
           curl -F document=@app/build/outputs/apk/betaModern/release/app-beta-modern-release.apk \
                -F chat_id=${{ secrets.TELEGRAM_CHAT_ID }} \
+               -F caption="<@&1246876742568644720> Artifact Build\n$(cat commit_log.txt)" \
                https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendDocument
 
       - name: Send Legacy Beta APK to Telegram
@@ -88,17 +90,14 @@ jobs:
       - name: Send Beta APK to Discord
         if: always()
         run: |
-          payload=$(jq -nc --arg content "<@&1246876742568644720>" '{content: $content}')
-          curl -F "payload_json=$payload" \
+          curl -F "payload_json={\"content\": \"<@&1246876742568644720> Artifact Build\"}" \
                -F "file1=@app/build/outputs/apk/betaModern/release/app-beta-modern-release.apk" \
                ${{ secrets.DISCORD_WEBHOOK_URL }}
 
       - name: Send Legacy Beta APK to Discord
         if: always()
         run: |
-          payload=$(jq -nc --arg content "<@&1246876742568644720>" '{content: $content}')
-          curl -F "payload_json=$payload" \
-               -F "file1=@app/build/outputs/apk/betaLegacy/release/app-beta-legacy-release.apk" \
+          curl -F "file1=@app/build/outputs/apk/betaLegacy/release/app-beta-legacy-release.apk" \
                ${{ secrets.DISCORD_WEBHOOK_URL }}
 
       - name: Upload Current SHA Artifact
