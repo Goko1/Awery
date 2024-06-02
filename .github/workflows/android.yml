@@ -30,6 +30,7 @@ jobs:
           COMMIT_LOG="${COMMIT_LOG//'%'/'%25'}"
           COMMIT_LOG="${COMMIT_LOG//$'\n'/'%0A'}"
           COMMIT_LOG="${COMMIT_LOG//$'\r'/'%0D'}"
+          COMMIT_LOG=$(echo "$COMMIT_LOG" | sed 's/%0A/\n/g; s/^/\n/')
           echo "COMMIT_LOG=${COMMIT_LOG}" >> $GITHUB_ENV
           echo "$COMMIT_LOG" > commit_log.txt
         shell: bash
@@ -128,15 +129,13 @@ jobs:
       - name: Check directory contents
         run: ls -R app/build/outputs/apk
 
-
       - name: Send Beta APK to Telegram
         if: always()
         run: |
           curl -F document=@app/build/outputs/apk/betaModern/release/app-beta-modern-release-signed.apk \
           -F chat_id=${{ secrets.TELEGRAM_CHAT_ID }} \
-          -F caption="Alpha Release 
-            $(cat commit_log.txt)" \ 
-           https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendDocument
+          -F caption="Alpha Release\n$(cat commit_log.txt)" \
+          https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendDocument
 
       - name: Send Legacy Beta APK to Telegram
         if: always()
@@ -161,5 +160,4 @@ jobs:
       - name: Send Legacy Beta APK to Discord
         if: always()
         run: |
-          curl -F "file1=@app/build/outputs/apk/betaLegacy/release/app-beta-legacy-release-signed.apk" \
-               ${{ secrets.DISCORD_WEBHOOK_URL }}
+          curl -F "file1=@app/build/outputs/apk/betaLegacy/release/app-beta-legacy-release
