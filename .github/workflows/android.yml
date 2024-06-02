@@ -125,6 +125,10 @@ jobs:
           retention-days: 90
           path: "app/build/outputs/apk/prodLegacy/release/app-prod-legacy-release-signed.apk"
 
+      - name: Check directory contents
+        run: ls -R app/build/outputs/apk
+
+
       - name: Send Beta APK to Telegram
         if: always()
         run: |
