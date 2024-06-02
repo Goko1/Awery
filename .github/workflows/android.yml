@@ -86,7 +86,10 @@ jobs:
     - name: Get Commit Messages
       id: commit_message
       run: |
-        commits=$(git log -1 --pretty=format:"commit %H by %an%nMessage: %s" $GITHUB_SHA)
+        commit_id=$(git log -1 --pretty=format:"%h")
+        author=$(git log -1 --pretty=format:"[%an](https://github.com/%ae)")
+        message=$(git log -1 --pretty=format:"%s")
+        commits="commit $commit_id by $author\nMessage: $message"
         echo "::set-output name=commits::$commits"
 
     - name: Send Beta APK to Telegram
