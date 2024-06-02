@@ -35,34 +35,19 @@ jobs:
     - name: Build Legacy Production APK
       run: ./gradlew assembleProdLegacyRelease
 
-    # List directory contents to debug paths
-    - name: List build outputs
-      run: |
-        echo "Listing app/build/outputs/apk/betaModern/release"
-        ls -R app/build/outputs/apk/betaModern/release || echo "Directory not found"
-        
-        echo "Listing app/build/outputs/apk/prodModern/release"
-        ls -R app/build/outputs/apk/prodModern/release || echo "Directory not found"
-        
-        echo "Listing app/build/outputs/apk/betaLegacy/release"
-        ls -R app/build/outputs/apk/betaLegacy/release || echo "Directory not found"
-        
-        echo "Listing app/build/outputs/apk/prodLegacy/release"
-        ls -R app/build/outputs/apk/prodLegacy/release || echo "Directory not found"
-
     - name: Upload Beta APK
       uses: actions/upload-artifact@v4
       with:
         name: "Beta APK"
         retention-days: 90
-        path: "app/build/outputs/apk/betaModern/release/app-beta-modern-release-signed.apk"
+        path: "app/build/outputs/apk/betaModern/release/app-beta-modern-release.apk"
 
     - name: Upload Legacy Beta APK
       uses: actions/upload-artifact@v4
       with:
         name: "Legacy Beta APK"
         retention-days: 90
-        path: "app/build/outputs/apk/betaLegacy/release/app-beta-legacy-release-signed.apk"
+        path: "app/build/outputs/apk/betaLegacy/release/app-beta-legacy-release.apk"
 
     - name: Get Commit Messages
       id: commit_message
@@ -72,14 +57,14 @@ jobs:
 
     - name: Send Beta APK to Telegram
       run: |
-        curl -F document=@app/build/outputs/apk/betaModern/release/app-beta-modern-release-signed.apk \
+        curl -F document=@app/build/outputs/apk/betaModern/release/app-beta-modern-release.apk \
              -F chat_id=${{ secrets.TELEGRAM_CHAT_ID }} \
              -F caption="New Beta APK\nCommits:\n${{ steps.commit_message.outputs.commits }}" \
              https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendDocument
 
     - name: Send Legacy Beta APK to Telegram
       run: |
-        curl -F document=@app/build/outputs/apk/betaLegacy/release/app-beta-legacy-release-signed.apk \
+        curl -F document=@app/build/outputs/apk/betaLegacy/release/app-beta-legacy-release.apk \
              -F chat_id=${{ secrets.TELEGRAM_CHAT_ID }} \
              -F caption="New Legacy Beta APK\nCommits:\n${{ steps.commit_message.outputs.commits }}" \
              https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendDocument
@@ -88,12 +73,12 @@ jobs:
       run: |
         commit_messages=${{ steps.commit_message.outputs.commits }}
         curl -F "payload_json={\"content\": \"New Beta APK\nCommits:\n${commit_messages}\"}" \
-             -F "file1=@app/build/outputs/apk/betaModern/release/app-beta-modern-release-signed.apk" \
+             -F "file1=@app/build/outputs/apk/betaModern/release/app-beta-modern-release.apk" \
              ${{ secrets.DISCORD_WEBHOOK_URL }}
 
     - name: Send Legacy Beta APK to Discord
       run: |
         commit_messages=${{ steps.commit_message.outputs.commits }}
         curl -F "payload_json={\"content\": \"New Legacy Beta APK\nCommits:\n${commit_messages}\"}" \
-             -F "file1=@app/build/outputs/apk/betaLegacy/release/app-beta-legacy-release-signed.apk" \
+             -F "file1=@app/build/outputs/apk/betaLegacy/release/app-beta-legacy-release.apk" \
              ${{ secrets.DISCORD_WEBHOOK_URL }}
