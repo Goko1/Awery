@@ -89,7 +89,7 @@ jobs:
         commit_id=$(git log -1 --pretty=format:"%h")
         author=$(git log -1 --pretty=format:"[%an](https://github.com/%ae)")
         message=$(git log -1 --pretty=format:"%s")
-        commits="commit $commit_id by $author\nMessage: $message"
+        Commit=" $commit_id by $author\nMessage: $message"
         echo "::set-output name=commits::$commits"
 
     - name: Send Beta APK to Telegram
@@ -97,7 +97,7 @@ jobs:
       run: |
         curl -F document=@app/build/outputs/apk/betaModern/release/app-beta-modern-release.apk \
              -F chat_id=${{ secrets.TELEGRAM_CHAT_ID }} \
-             -F caption="$(echo -e "New Beta APK\nCommits:\n${{ steps.commit_message.outputs.commits }}")" \
+             -F caption="$(echo -e "\nCommits:\n${{ steps.commit_message.outputs.commits }}")" \
              https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendDocument
 
     - name: Send Legacy Beta APK to Telegram
@@ -105,14 +105,14 @@ jobs:
       run: |
         curl -F document=@app/build/outputs/apk/betaLegacy/release/app-beta-legacy-release.apk \
              -F chat_id=${{ secrets.TELEGRAM_CHAT_ID }} \
-             -F caption="$(echo -e "Awery update\nCommits:\n${{ steps.commit_message.outputs.commits }}")" \
+             -F caption="$(echo -e "\nCommits:\n${{ steps.commit_message.outputs.commits }}")" \
              https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendDocument
 
     - name: Send Beta APK to Discord
       if: always()
       run: |
         commit_messages=$(echo -e "${{ steps.commit_message.outputs.commits }}")
-        payload="{\"content\": \"Awery update\nCommits:\n$commit_messages\"}"
+        payload="{\"content\": \"@1246876742568644720\nCommits:\n$commit_messages\"}"
         curl -F "payload_json=$payload" \
              -F "file1=@app/build/outputs/apk/betaModern/release/app-beta-modern-release.apk" \
              ${{ secrets.DISCORD_WEBHOOK_URL }}
@@ -121,7 +121,7 @@ jobs:
       if: always()
       run: |
         commit_messages=$(echo -e "${{ steps.commit_message.outputs.commits }}")
-        payload="{\"content\": \"Awery update\nCommits:\n$commit_messages\"}"
+        payload="{\"content\": \"@1246876742568644720\nCommits:\n$commit_messages\"}"
         curl -F "payload_json=$payload" \
              -F "file1=@app/build/outputs/apk/betaLegacy/release/app-beta-legacy-release.apk" \
              ${{ secrets.DISCORD_WEBHOOK_URL }}
