@@ -2,9 +2,9 @@ name: Artifact Build
 
 on:
   push:
-    branches: [master]
+    branches: [ master ]
   pull_request:
-    branches: [master]
+    branches: [ master ]
 
 jobs:
   build:
@@ -89,7 +89,8 @@ jobs:
           REPO_URL="https://github.com/${{ github.repository }}"
           commit_id=$(git log -1 --pretty=format:"%h")
           author=$(git log -1 --pretty=format:"%an")
-          author_username=$(git log -1 --pretty=format:"%ae" | sed 's/@.*//')
+          author_email=$(git log -1 --pretty=format:"%ae")
+          author_username=$(curl -s "https://api.github.com/search/users?q=${author_email}" | jq -r '.items[0].login')
           author_profile="https://github.com/$author_username"
           commit_link="[Commit]($REPO_URL/commit/$(git log -1 --pretty=format:"%H"))"
           message=$(git log -1 --pretty=format:"%s")
@@ -109,14 +110,13 @@ jobs:
         run: |
           curl -F document=@app/build/outputs/apk/betaLegacy/release/app-beta-legacy-release.apk \
                -F chat_id=${{ secrets.TELEGRAM_CHAT_ID }} \
-               -F caption="$(echo -e "\n${{ secrets.TELEGRAM_ROLE_ID }}\n${{ steps.commit_message.outputs.Commit }}")" \
                https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendDocument
 
       - name: Send Beta APK to Discord
         if: always()
         run: |
           commit_messages=$(echo -e "${{ steps.commit_message.outputs.Commit }}")
-          payload=$(jq -nc --arg content "<@&${{ secrets.DISCORD_ROLE_ID }}>\n$commit_messages" '{content: $content}')
+          payload=$(jq -nc --arg content "<@&$1246876742568644720>\n$commit_messages" '{content: $content}')
           curl -F "payload_json=$payload" \
                -F "file1=@app/build/outputs/apk/betaModern/release/app-beta-modern-release.apk" \
                ${{ secrets.DISCORD_WEBHOOK_URL }}
@@ -124,8 +124,5 @@ jobs:
       - name: Send Legacy Beta APK to Discord
         if: always()
         run: |
-          commit_messages=$(echo -e "${{ steps.commit_message.outputs.Commit }}")
-          payload=$(jq -nc --arg content "<@&${{ secrets.DISCORD_ROLE_ID }}>\n$commit_messages" '{content: $content}')
-          curl -F "payload_json=$payload" \
-               -F "file1=@app/build/outputs/apk/betaLegacy/release/app-beta-legacy-release.apk" \
-               ${{ secrets.DISCORD_WEBHOOK_URL }}
+           curl -F "file1=@app/build/outputs/apk/betaLegacy/release/app-beta-legacy-release.apk" \
+           ${{ secrets.DISCORD_WEBHOOK_URL }}
