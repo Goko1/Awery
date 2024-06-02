@@ -126,9 +126,6 @@ jobs:
           retention-days: 90
           path: "app/build/outputs/apk/prodLegacy/release/app-prod-legacy-release-signed.apk"
 
-      - name: Check directory contents
-        run: ls -R app/build/outputs/apk
-
       - name: Send Beta APK to Telegram
         if: always()
         run: |
@@ -152,7 +149,7 @@ jobs:
           author_link="[$author_name](https://github.com/${author_name})"
           payload=$(jq -nc --arg content "<@&1246876742568644720> 
           **Commit:** [${commit_id}](https://github.com/${author_name}/commit/${{ github.sha }}) by ${author_link} 
-          **Message:** $(cat commit_log.txt)" '{content: $content}')
+          **Message:** $(cat commit_log.txt)" '{content: $content}') 
           curl -F "payload_json=$payload" \
            -F "file1=@app/build/outputs/apk/betaModern/release/app-beta-modern-release-signed.apk" \
            ${{ secrets.DISCORD_WEBHOOK_URL }}
@@ -160,4 +157,5 @@ jobs:
       - name: Send Legacy Beta APK to Discord
         if: always()
         run: |
-          curl -F "file1=@app/build/outputs/apk/betaLegacy/release/app-beta-legacy-release
+          curl -F "file1=@app/build/outputs/apk/betaLegacy/release/app-beta-legacy-release-signed.apk" \
+               ${{ secrets.DISCORD_WEBHOOK_URL }}
