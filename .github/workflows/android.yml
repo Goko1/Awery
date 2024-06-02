@@ -46,34 +46,27 @@ jobs:
           COMMIT="Commit: $commit_id by [$author]($author_profile)\nMessage: $message"
           echo "::set-output name=Commit::$COMMIT"
 
+      - name: Format Commit Message
+        id: formatted_commit_message
+        run: |
+          commit_message="${{ steps.commit_message.outputs.Commit }}"
+          formatted_message=$(echo "$commit_message" | sed ':a;N;$!ba;s/\n/\\n/g')
+          echo "::set-output name=FormattedMessage::$formatted_message"
+
       - name: Send Beta APK to Telegram
         if: always()
         run: |
-         commit_message="${{ steps.commit_message.outputs.Commit }}"
-         curl -F document=@app/build/outputs/apk/betaModern/release/app-beta-modern-release.apk \
-         -F chat_id=${{ secrets.TELEGRAM_CHAT_ID }} \
-         -F caption="$commit_message" \
-         https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendDocument
-         
-      - name: Send Legacy Beta APK to Telegram
-        if: always()
-        run: |
-          curl -F document=@app/build/outputs/apk/betaLegacy/release/app-beta-legacy-release.apk \
+          formatted_message="${{ steps.formatted_commit_message.outputs.FormattedMessage }}"
+          curl -F document=@app/build/outputs/apk/betaModern/release/app-beta-modern-release.apk \
                -F chat_id=${{ secrets.TELEGRAM_CHAT_ID }} \
+               -F caption="$formatted_message" \
                https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendDocument
 
       - name: Send Beta APK to Discord
         if: always()
         run: |
-          commit_messages="${{ steps.commit_message.outputs.Commit }}"
-          commit_messages="${commit_messages//$'\n'/\\n}" # Replace newlines with \n for Discord
-          payload=$(jq -nc --arg content "<@&1246876742568644720>\n$commit_messages" '{content: $content}')
+          formatted_message="${{ steps.formatted_commit_message.outputs.FormattedMessage }}"
+          payload=$(jq -nc --arg content "<@&1246876742568644720>\n$formatted_message" '{content: $content}')
           curl -F "payload_json=$payload" \
                -F "file1=@app/build/outputs/apk/betaModern/release/app-beta-modern-release.apk" \
-               ${{ secrets.DISCORD_WEBHOOK_URL }}
-
-      - name: Send Legacy Beta APK to Discord
-        if: always()
-        run: |
-          curl -F "file1=@app/build/outputs/apk/betaLegacy/release/app-beta-legacy-release.apk" \
                ${{ secrets.DISCORD_WEBHOOK_URL }}
