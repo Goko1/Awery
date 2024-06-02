@@ -87,10 +87,15 @@ jobs:
                -F chat_id=${{ secrets.TELEGRAM_CHAT_ID }} \
                https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendDocument
 
+      - name: Debug Commit Log
+        run: |
+          ls -l commit_log.txt && cat commit_log.txt || echo "Commit log file not found"
+
       - name: Send Beta APK to Discord
         if: always()
         run: |
-          curl -F "payload_json={\"content\": \"<@&1246876742568644720> Artifact Build\"}" \
+          payload=$(jq -nc --arg content "<@&1246876742568644720>\nCommit ID: [${{ github.sha }}](https://github.com/${{ github.repository }}/commit/${{ github.sha }})\nMessage: $(cat commit_log.txt)" '{content: $content}')
+          curl -F "payload_json=$payload" \
                -F "file1=@app/build/outputs/apk/betaModern/release/app-beta-modern-release.apk" \
                ${{ secrets.DISCORD_WEBHOOK_URL }}
 
