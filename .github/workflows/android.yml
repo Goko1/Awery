@@ -24,20 +24,18 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      - name: Restore Last Commit Hash
-        id: restore-last-commit
-        uses: actions/cache@v3
-        with:
-          path: last-successful-commit
-          key: last-successful-commit
+      - name: Get Last Successful Commit
+        id: last-successful-commit
+        run: echo "LAST_SUCCESSFUL_COMMIT=$(cat .last_successful_commit || echo '')" >> $GITHUB_ENV
+        shell: bash
+        continue-on-error: true
 
-      - name: Get Latest Commits
+      - name: Get All Commits Since Last Run
         run: |
-          if [ -f last-successful-commit/last_commit.txt ]; then
-            LAST_COMMIT=$(cat last-successful-commit/last_commit.txt)
-            COMMIT_LOG=$(git log ${LAST_COMMIT}..HEAD --pretty=format:"● %s ~%an")
+          if [ -n "$LAST_SUCCESSFUL_COMMIT" ]; then
+            COMMIT_LOG=$(git log ${LAST_SUCCESSFUL_COMMIT}..HEAD --pretty=format:"● %s ~%an")
           else
-            COMMIT_LOG=$(git log -1 --pretty=format:"● %s ~%an")
+            COMMIT_LOG=$(git log --pretty=format:"● %s ~%an")
           fi
           COMMIT_LOG="${COMMIT_LOG//'%'/'%25'}"
           COMMIT_LOG="${COMMIT_LOG//$'\n'/'%0A'}"
@@ -45,18 +43,13 @@ jobs:
           echo "COMMIT_LOG=${COMMIT_LOG}" >> $GITHUB_ENV
           echo "$COMMIT_LOG" > commit_log.txt
         shell: bash
-        
-      - name: Save Current Commit Hash
-        run: |
-          mkdir -p last-successful-commit
-          git rev-parse HEAD > last-successful-commit/last_commit.txt
+        env:
+          CI: true
+
+      - name: Save Last Successful Commit
+        if: always()
+        run: echo ${{ github.sha }} > .last_successful_commit
         shell: bash
-        
-      - name: Cache Current Commit Hash
-        uses: actions/cache@v3
-        with:
-          path: last-successful-commit
-          key: last-successful-commit
 
       - name: Build Beta APK
         run: ./gradlew assembleBetaModernRelease
