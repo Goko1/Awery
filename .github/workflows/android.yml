@@ -24,10 +24,19 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
+      - name: Get Last Successful Commit
+        id: last-successful-commit
+        run: echo "LAST_SUCCESSFUL_COMMIT=$(cat .last_successful_commit || echo '')" >> $GITHUB_ENV
+        shell: bash
+        continue-on-error: true
+
       - name: Get All Commits Since Last Run
         run: |
-          LAST_COMMIT=$(git rev-parse HEAD~1)
-          COMMIT_LOG=$(git log ${LAST_COMMIT}..HEAD --pretty=format:"● %s ~%an")
+          if [ -n "$LAST_SUCCESSFUL_COMMIT" ]; then
+            COMMIT_LOG=$(git log ${LAST_SUCCESSFUL_COMMIT}..HEAD --pretty=format:"● %s ~%an")
+          else
+            COMMIT_LOG=$(git log --pretty=format:"● %s ~%an")
+          fi
           COMMIT_LOG="${COMMIT_LOG//'%'/'%25'}"
           COMMIT_LOG="${COMMIT_LOG//$'\n'/'%0A'}"
           COMMIT_LOG="${COMMIT_LOG//$'\r'/'%0D'}"
@@ -36,7 +45,11 @@ jobs:
         shell: bash
         env:
           CI: true
-        continue-on-error: true
+
+      - name: Save Last Successful Commit
+        if: always()
+        run: echo ${{ github.sha }} > .last_successful_commit
+        shell: bash
 
       - name: Build Beta APK
         run: ./gradlew assembleBetaModernRelease
