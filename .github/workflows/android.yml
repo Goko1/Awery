@@ -13,9 +13,6 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
-        with:
-          persist-credentials: false
-          fetch-depth: 0 # Ensure the entire history is available
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
@@ -27,37 +24,47 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      - name: Get Last Successful Commit
-        id: last-successful-commit
-        run: |
-          if [ -f .last_successful_commit ]; then
-            echo "LAST_SUCCESSFUL_COMMIT=$(cat .last_successful_commit)" >> $GITHUB_ENV
-          else
-            echo "LAST_SUCCESSFUL_COMMIT=" >> $GITHUB_ENV
-          fi
-        shell: bash
+      - name: Download last SHA artifact (if exists)
+        id: download_last_sha
+        uses: dawidd6/action-download-artifact@v3
+        with:
+          workflow: android.yml  # Ensure this matches the workflow that uploads last-sha
+          name: last-sha
+          path: .
         continue-on-error: true
 
-      - name: Get All Commits Since Last Run
+      - name: Get Commits Since Last Run
         run: |
-          if [ -n "$LAST_SUCCESSFUL_COMMIT" ]; then
-            COMMIT_LOG=$(git log ${LAST_SUCCESSFUL_COMMIT}..HEAD --pretty=format:"● %s ~%an")
+          if [ -f last_sha.txt ]; then
+            LAST_SHA=$(cat last_sha.txt)
+            if git cat-file -e "$LAST_SHA"; then
+              echo "Commits since $LAST_SHA:"
+              # Accumulate commit logs in a shell variable
+              COMMIT_LOGS=$(git log $LAST_SHA..HEAD --pretty=format:"● %s ~%an")
+              # URL-encode the newline characters for GitHub Actions
+              COMMIT_LOGS="${COMMIT_LOGS//'%'/'%25'}"
+              COMMIT_LOGS="${COMMIT_LOGS//$'\n'/'%0A'}"
+              COMMIT_LOGS="${COMMIT_LOGS//$'\r'/'%0D'}"
+              # Append the encoded commit logs to the COMMIT_LOG environment variable
+              echo "COMMIT_LOG=${COMMIT_LOGS}" >> $GITHUB_ENV
+              # Debugging: Print the variable to check its content
+              echo "$COMMIT_LOGS"
+              echo "$COMMIT_LOGS" > commit_log.txt
+            else
+              echo "Invalid commit SHA stored in last_sha.txt. Falling back to first commit."
+              LAST_SHA=$(git rev-list --max-parents=0 HEAD)
+            fi
           else
-            COMMIT_LOG=$(git log --pretty=format:"● %s ~%an")
+            echo "No last_sha.txt file found. Falling back to first commit."
+            LAST_SHA=$(git rev-list --max-parents=0 HEAD)
           fi
-          COMMIT_LOG="${COMMIT_LOG//'%'/'%25'}"
-          COMMIT_LOG="${COMMIT_LOG//$'\n'/'%0A'}"
-          COMMIT_LOG="${COMMIT_LOG//$'\r'/'%0D'}"
-          echo "COMMIT_LOG=${COMMIT_LOG}" >> $GITHUB_ENV
-          echo "$COMMIT_LOG" > commit_log.txt
         shell: bash
         env:
           CI: true
+        continue-on-error: true
 
-      - name: Save Last Successful Commit
-        if: always()
-        run: echo ${{ github.sha }} > .last_successful_commit
-        shell: bash
+      - name: Generate Commit Log
+        run: echo "Initial commit" > commit_log.txt
 
       - name: Build Beta APK
         run: ./gradlew assembleBetaModernRelease
@@ -146,7 +153,7 @@ jobs:
           name: "Legacy Production APK"
           retention-days: 90
           path: "app/build/outputs/apk/prodLegacy/release/app-prod-legacy-release-signed.apk"
-          
+
       - name: Send Beta APK to Telegram
         if: always()
         run: |
@@ -176,8 +183,24 @@ jobs:
           curl -F "payload_json=$payload" \
            -F "file1=@app/build/outputs/apk/betaModern/release/app-beta-modern-release-signed.apk" \
            ${{ secrets.DISCORD_WEBHOOK_URL }}
+
       - name: Send Legacy Beta APK to Discord
         if: always()
         run: |
           curl -F "file1=@app/build/outputs/apk/betaLegacy/release/app-beta-legacy-release-signed.apk" \
                ${{ secrets.DISCORD_WEBHOOK_URL }}
+
+      - name: Save Current SHA for Next Run
+        run: echo ${{ github.sha }} > last_sha.txt
+
+      - name: Upload Current SHA as Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: last-sha
+          path: last_sha.txt
+
+      - name: Upload Commit log as Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: commit-log
+          path: commit_log.txt
