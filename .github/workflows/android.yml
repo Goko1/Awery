@@ -29,7 +29,12 @@ jobs:
 
       - name: Get Last Successful Commit
         id: last-successful-commit
-        run: echo "LAST_SUCCESSFUL_COMMIT=$(cat .last_successful_commit || echo '')" >> $GITHUB_ENV
+        run: |
+          if [ -f .last_successful_commit ]; then
+            echo "LAST_SUCCESSFUL_COMMIT=$(cat .last_successful_commit)" >> $GITHUB_ENV
+          else
+            echo "LAST_SUCCESSFUL_COMMIT=" >> $GITHUB_ENV
+          fi
         shell: bash
         continue-on-error: true
 
