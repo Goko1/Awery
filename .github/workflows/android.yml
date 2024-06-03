@@ -37,22 +37,27 @@ jobs:
         run: |
           if [ -f last_sha.txt ]; then
             LAST_SHA=$(cat last_sha.txt)
+            if git cat-file -e "$LAST_SHA"; then
+              echo "Commits since $LAST_SHA:"
+              # Accumulate commit logs in a shell variable
+              COMMIT_LOGS=$(git log $LAST_SHA..HEAD --pretty=format:"● %s ~%an")
+              # URL-encode the newline characters for GitHub Actions
+              COMMIT_LOGS="${COMMIT_LOGS//'%'/'%25'}"
+              COMMIT_LOGS="${COMMIT_LOGS//$'\n'/'%0A'}"
+              COMMIT_LOGS="${COMMIT_LOGS//$'\r'/'%0D'}"
+              # Append the encoded commit logs to the COMMIT_LOG environment variable
+              echo "COMMIT_LOG=${COMMIT_LOGS}" >> $GITHUB_ENV
+              # Debugging: Print the variable to check its content
+              echo "$COMMIT_LOGS"
+              echo "$COMMIT_LOGS" > commit_log.txt
+            else
+              echo "Invalid commit SHA stored in last_sha.txt. Falling back to first commit."
+              LAST_SHA=$(git rev-list --max-parents=0 HEAD)
+            fi
           else
-            # Fallback to first commit if no previous SHA available
+            echo "No last_sha.txt file found. Falling back to first commit."
             LAST_SHA=$(git rev-list --max-parents=0 HEAD)
           fi
-          echo "Commits since $LAST_SHA:"
-          # Accumulate commit logs in a shell variable
-          COMMIT_LOGS=$(git log $LAST_SHA..HEAD --pretty=format:"● %s ~%an")
-          # URL-encode the newline characters for GitHub Actions
-          COMMIT_LOGS="${COMMIT_LOGS//'%'/'%25'}"
-          COMMIT_LOGS="${COMMIT_LOGS//$'\n'/'%0A'}"
-          COMMIT_LOGS="${COMMIT_LOGS//$'\r'/'%0D'}"
-          # Append the encoded commit logs to the COMMIT_LOG environment variable
-          echo "COMMIT_LOG=${COMMIT_LOGS}" >> $GITHUB_ENV
-          # Debugging: Print the variable to check its content
-          echo "$COMMIT_LOGS"
-          echo "$COMMIT_LOGS" > commit_log.txt
         shell: bash
         env:
           CI: true
