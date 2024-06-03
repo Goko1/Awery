@@ -24,10 +24,11 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      - name: Download last SHA artifact
+      - name: Download last SHA artifact (if exists)
+        id: download_last_sha
         uses: dawidd6/action-download-artifact@v3
         with:
-          workflow: android.yml
+          workflow: android.yml  # Ensure this matches the workflow that uploads last-sha
           name: last-sha
           path: .
         continue-on-error: true
@@ -52,7 +53,7 @@ jobs:
           # Debugging: Print the variable to check its content
           echo "$COMMIT_LOGS"
           echo "$COMMIT_LOGS" > commit_log.txt
-          shell: /usr/bin/bash -e {0}
+        shell: bash
         env:
           CI: true
         continue-on-error: true
