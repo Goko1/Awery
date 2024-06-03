@@ -63,6 +63,9 @@ jobs:
           CI: true
         continue-on-error: true
 
+      - name: Generate Commit Log
+        run: echo "Initial commit" > commit_log.txt
+
       - name: Build Beta APK
         run: ./gradlew assembleBetaModernRelease
 
