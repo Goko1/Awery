@@ -64,10 +64,10 @@ jobs:
         continue-on-error: true
 
       - name: Generate Commit Log
-        run: echo "Initial commit" > commit_log.txt
-        if: !
-           contains(steps.download_last_sha.outputs.artifacts, 
-           'last-sha')
+        run: |
+         if [ ! -f commit_log.txt ]; then
+         echo "Initial commit" > commit_log.txt
+         fi
   
       - name: Build Beta APK
         run: ./gradlew assembleBetaModernRelease
