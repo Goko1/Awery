@@ -62,12 +62,6 @@ jobs:
         env:
           CI: true
         continue-on-error: true
-
-      - name: Generate Commit Log
-        run: |
-         if [ ! -f commit_log.txt ]; then
-         echo "Initial commit" > commit_log.txt
-         fi
   
       - name: Build Beta APK
         run: ./gradlew assembleBetaModernRelease
