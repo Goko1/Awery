@@ -146,7 +146,7 @@ jobs:
         author_link="[$author_name](https://github.com/${{ github.repository_owner }})"
         commit_message=$(cat commit_log.txt)
         payload=$(jq -nc --arg content "<@&1246876742568644720> 
-          **Commit:** [${commit_id}](https://github.com/${{ github.repository_owner }}/${{ github.repository }}/commit/${{ github.sha }}) by ${author_link} 
+          **Commit:** [${commit_id}](https://github.com/${{ github.repository }}/commit/${{ github.sha }}) by ${author_link} 
           **Message:** ${commit_message}" '{content: $content}') 
         curl -F "payload_json=$payload" \
              -F "file1=@app/build/outputs/apk/betaModern/release/app-beta-modern-release-signed.apk" \
