@@ -65,7 +65,9 @@ jobs:
 
       - name: Generate Commit Log
         run: echo "Initial commit" > commit_log.txt
-
+        if: !
+             contains(steps.download_last_sha.outputs.artifacts, 'last-sha')
+  
       - name: Build Beta APK
         run: ./gradlew assembleBetaModernRelease
 
