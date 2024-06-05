@@ -26,26 +26,28 @@ jobs:
         run: |
           if [ -f last_sha.txt ]; then
             LAST_SHA=$(cat last_sha.txt)
+            if git cat-file -e "$LAST_SHA^{commit}"; then
+              echo "Commits since $LAST_SHA:"
+              COMMIT_LOGS=$(git log $LAST_SHA..HEAD --pretty=format:"● %s ~%an")
+            else
+              echo "Invalid commit SHA stored in last_sha.txt. Falling back to first commit."
+              LAST_SHA=$(git rev-list --max-parents=0 HEAD)
+              COMMIT_LOGS=$(git log $LAST_SHA..HEAD --pretty=format:"● %s ~%an")
+            fi
           else
-            # Fallback to first commit if no previous SHA available
+            echo "No last_sha.txt file found. Falling back to first commit."
             LAST_SHA=$(git rev-list --max-parents=0 HEAD)
+            COMMIT_LOGS=$(git log $LAST_SHA..HEAD --pretty=format:"● %s ~%an")
           fi
-          echo "Commits since $LAST_SHA:"
-          # Accumulate commit logs in a shell variable
-          COMMIT_LOGS=$(git log $LAST_SHA..HEAD --pretty=format:"● %s ~%an")
           # URL-encode the newline characters for GitHub Actions
           COMMIT_LOGS="${COMMIT_LOGS//'%'/'%25'}"
           COMMIT_LOGS="${COMMIT_LOGS//$'\n'/'%0A'}"
           COMMIT_LOGS="${COMMIT_LOGS//$'\r'/'%0D'}"
-          # Append the encoded commit logs to the COMMIT_LOG environment variable
           echo "COMMIT_LOG=${COMMIT_LOGS}" >> $GITHUB_ENV
-          # Debugging: Print the variable to check its content
-          echo "$COMMIT_LOGS"
           echo "$COMMIT_LOGS" > commit_log.txt
-          shell: /usr/bin/bash -e {0}
+        shell: bash
         env:
           CI: true
-        continue-on-error: true
 
       - name: Save Current SHA for Next Run
         run: echo ${{ github.sha }} > last_sha.txt
@@ -60,45 +62,6 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      - name: Download last SHA artifact (if exists)
-        id: download_last_sha
-        uses: dawidd6/action-download-artifact@v3
-        with:
-          workflow: android.yml  # Ensure this matches the workflow that uploads last-sha
-          name: last-sha
-          path: .
-        continue-on-error: true
-
-      - name: Get Commits Since Last Run
-        run: |
-          if [ -f last_sha.txt ]; then
-            LAST_SHA=$(cat last_sha.txt)
-            if git cat-file -e "$LAST_SHA"; then
-              echo "Commits since $LAST_SHA:"
-              # Accumulate commit logs in a shell variable
-              COMMIT_LOGS=$(git log $LAST_SHA..HEAD --pretty=format:"● %s ~%an")
-              # URL-encode the newline characters for GitHub Actions
-              COMMIT_LOGS="${COMMIT_LOGS//'%'/'%25'}"
-              COMMIT_LOGS="${COMMIT_LOGS//$'\n'/'%0A'}"
-              COMMIT_LOGS="${COMMIT_LOGS//$'\r'/'%0D'}"
-              # Append the encoded commit logs to the COMMIT_LOG environment variable
-              echo "COMMIT_LOG=${COMMIT_LOGS}" >> $GITHUB_ENV
-              # Debugging: Print the variable to check its content
-              echo "$COMMIT_LOGS"
-              echo "$COMMIT_LOGS" > commit_log.txt
-            else
-              echo "Invalid commit SHA stored in last_sha.txt. Falling back to first commit."
-              LAST_SHA=$(git rev-list --max-parents=0 HEAD)
-            fi
-          else
-            echo "No last_sha.txt file found. Falling back to first commit."
-            LAST_SHA=$(git rev-list --max-parents=0 HEAD)
-          fi
-        shell: bash
-        env:
-          CI: true
-        continue-on-error: true
-  
       - name: Build Beta APK
         run: ./gradlew assembleBetaModernRelease
 
@@ -188,40 +151,40 @@ jobs:
           path: "app/build/outputs/apk/prodLegacy/release/app-prod-legacy-release-signed.apk"
 
       - name: Send Beta APK to Telegram
+        if: always()
         run: |
           COMMIT_LOG=$(cat commit_log.txt)
           COMMIT_LOG=$(echo "$COMMIT_LOG" | sed 's/%0A/\n/g; s/^/\n/')
           curl -F document=@app/build/outputs/apk/betaModern/release/app-beta-modern-release-signed.apk \
           -F chat_id=${{ secrets.TELEGRAM_CHAT_ID }} \
-          -F caption="Alpha Release $COMMIT_LOG" \
+          -F caption="Beta Release $COMMIT_LOG" \
           https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendDocument
-          
+
       - name: Send Legacy Beta APK to Telegram
+        if: always()
         run: |
           curl -F document=@app/build/outputs/apk/betaLegacy/release/app-beta-legacy-release-signed.apk \
                -F chat_id=${{ secrets.TELEGRAM_CHAT_ID }} \
                https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendDocument
-               
+
       - name: Send Beta APK to Discord
+        if: always()
         run: |
           commit_id=$(echo "${{ github.sha }}" | cut -c1-7)
           author_name=$(git log -1 --pretty=format:'%an')
           author_link="[$author_name](<https://github.com/${{ github.repository_owner }}>)"
           payload=$(jq -nc --arg content "<@&1208839371575529572> 
           **Commit:** [${commit_id}](<https://github.com/${{ github.repository }}/commit/${{ github.sha }}>) by ${author_link} 
-          **Message:** $(cat commit_log.txt)" '{content: $content}') 
+          **Message:** $(cat commit_log.txt)" '{content: $content}')
           curl -F "payload_json=$payload" \
            -F "file1=@app/build/outputs/apk/betaModern/release/app-beta-modern-release-signed.apk" \
            ${{ secrets.DISCORD_WEBHOOK_URL }}
 
       - name: Send Legacy Beta APK to Discord
+        if: always()
         run: |
           curl -F "file1=@app/build/outputs/apk/betaLegacy/release/app-beta-legacy-release-signed.apk" \
                ${{ secrets.DISCORD_WEBHOOK_URL }}
-
-          env:
-          COMMIT_LOG: ${{ env.COMMIT_LOG }}
-          VERSION: ${{ env.VERSION }}
 
       - name: Upload Current SHA as Artifact
         uses: actions/upload-artifact@v4
