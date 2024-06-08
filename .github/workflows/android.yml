@@ -34,7 +34,7 @@ jobs:
           else
             echo "COMMIT_LOG=$(git log -1 --pretty=format:'%s ~%an' | sed 's/%/%25/g; s/$/%0A/')" >> $GITHUB_ENV  
           fi
-          echo "$(date +'%Y-%m-%d %H:%M:%S')" > last_run.txt
+          echo "$(git rev-parse HEAD)" > last_run.txt
 
       - name: Build Beta APK
         run: ./gradlew assembleBetaModernRelease
@@ -127,7 +127,7 @@ jobs:
       - name: Send Beta APK to Telegram
         if: always()
         run: |
-          COMMIT_LOG=${{ steps.get_commit_log.outputs.COMMIT_LOG }} 
+          COMMIT_LOG=${{ steps.get_commit_log.outputs.COMMIT_LOG }} # Get COMMIT_LOG directly
           COMMIT_LOG=$(echo "$COMMIT_LOG" | sed 's/%0A/\n/g; s/^/\n/')
           curl -F document=@app/build/outputs/apk/betaModern/release/app-beta-modern-release-signed.apk \
           -F chat_id=${{ secrets.TELEGRAM_CHAT_ID }} \
@@ -147,7 +147,7 @@ jobs:
           commit_id=$(echo "${{ github.sha }}" | cut -c1-7)
           author_name=$(git log -1 --pretty=format:'%an')
           author_link="[$author_name](<https://github.com/${{ github.repository_owner }}>)"
-          COMMIT_LOG=${{ steps.get_commit_log.outputs.COMMIT_LOG }} 
+          COMMIT_LOG=${{ steps.get_commit_log.outputs.COMMIT_LOG }} # Get COMMIT_LOG directly
           payload=$(jq -nc --arg content "<@&1208839371575529572> 
           **Commit:** [${commit_id}](<https://github.com/${{ github.repository }}/commit/${{ github.sha }}>) by ${author_link} 
           **Message:** ${COMMIT_LOG}" '{content: $content}') 
