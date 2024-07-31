@@ -33,20 +33,6 @@
 ### Localization
 - **Multilingual Support:** Enjoy the app in your preferred language with extensive translation options.
 
-## Planned Features 👀
-
-### Platform Expansion
-- **Android TV Support**: Experience Awery on a larger screen with Android TV compatibility.
-
-### Enhanced Content
-- **News Reader**: Stay updated with the latest anime news directly within the app.
-- **More Extensions Support**: Access additional content through support for Tachiyomi, Cloudstream, Miru, and LNReader.
-
-### Advanced Functionality
-- **Torrents Support**: Download anime episodes using torrent support.
-- **Offline Playback**: Watch your favorite anime offline by downloading episodes.
-- **Update Notifications**: Never miss an update with timely notifications about new releases and updates.
-
 ---
 
 Join the community and stay connected:
@@ -60,12 +46,17 @@ Awery is the all-in-one anime app that adapts to your preferences and keeps you 
 
 <h2>Planned Features 👀</h2>
 
-- Android TV support
-- News reader
-- More extensions support (Tachiyomi, Cloudstream, Miru and LNReader)
-- Torrents support
-- Offline playback
-- Update notifications
+### Platform Expansion
+- **Android TV Support:** Experience Awery on a larger screen with Android TV compatibility.
+
+### Enhanced Content
+- **News Reader**: Stay updated with the latest anime news directly within the app.
+- **More Extensions Support:** Access additional content through support for Tachiyomi, Cloudstream, Miru, and LNReader.
+
+### Advanced Functionality
+- **Torrents Support:** Download anime episodes using torrent support.
+- **Offline Playback:** Watch your favorite anime offline by downloading episodes.
+- **Update Notifications:** Never miss an update with timely notifications about new releases and updates.
 
 <h2>Contribution 🤝</h2>
 
