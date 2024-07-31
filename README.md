@@ -35,15 +35,6 @@
 
 ---
 
-Join the community and stay connected:
-- **[Discord Server](#)**
-- **[Telegram Channel](#)**
-- **[GitHub Downloads](#)**
-- **[GitHub Release](#)**
-- **[Weblate Project](#)**
-
-Awery is the all-in-one anime app that adapts to your preferences and keeps you connected with the anime world. Start your ultimate anime journey today!
-
 <h2>Planned Features 👀</h2>
 
 ### Platform Expansion
