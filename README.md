@@ -18,7 +18,7 @@
 
 
 ### Integration
-- *Use Any Aniyomi Extension:** Seamlessly integrate and use any Aniyomi extension to access a vast library of anime content.
+- **Use Any Aniyomi Extension:** Seamlessly integrate and use any Aniyomi extension to access a vast library of anime content.
 
 ### Syncing
 - **Progress Syncing:** Keep track of your watching progress by syncing with popular platforms like AniList, MyAnimeList, Shikimori, and more.
