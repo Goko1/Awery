@@ -16,12 +16,47 @@
 <h2>Features 🚀</h2>
 <img src="https://raw.githubusercontent.com/MrBoomDeveloper/Awery/master/docs/screenshot1.jpg" alt="Screenshot" />
 
-- Use any Aniyomi extension
-- Sync progress with your AniList, MyAnimeList, Shikimori and etc.
-- Leave and read other comments
-- Translation into many languages
-- Filter out tags like mecha from the whole app!
-- Blacklist unwanted media
+
+### Integration
+- *Use Any Aniyomi Extension*: Seamlessly integrate and use any Aniyomi extension to access a vast library of anime content.
+
+### Syncing
+- **Progress Syncing**: Keep track of your watching progress by syncing with popular platforms like AniList, MyAnimeList, Shikimori, and more.
+
+### Community
+- **Comments**: Leave and read comments to engage with other anime fans and share your thoughts.
+
+### Customization
+- **Tag Filtering**: Customize your experience by filtering out tags you don't like, such as mecha, across the entire app.
+- **Blacklist Unwanted Media**: Ensure your watchlist is tailored to your preferences by blacklisting unwanted media.
+
+### Localization
+- **Multilingual Support**: Enjoy the app in your preferred language with extensive translation options.
+
+## Planned Features 👀
+
+### Platform Expansion
+- **Android TV Support**: Experience Awery on a larger screen with Android TV compatibility.
+
+### Enhanced Content
+- **News Reader**: Stay updated with the latest anime news directly within the app.
+- **More Extensions Support**: Access additional content through support for Tachiyomi, Cloudstream, Miru, and LNReader.
+
+### Advanced Functionality
+- **Torrents Support**: Download anime episodes using torrent support.
+- **Offline Playback**: Watch your favorite anime offline by downloading episodes.
+- **Update Notifications**: Never miss an update with timely notifications about new releases and updates.
+
+---
+
+Join the community and stay connected:
+- **[Discord Server](#)**
+- **[Telegram Channel](#)**
+- **[GitHub Downloads](#)**
+- **[GitHub Release](#)**
+- **[Weblate Project](#)**
+
+Awery is the all-in-one anime app that adapts to your preferences and keeps you connected with the anime world. Start your ultimate anime journey today!
 
 <h2>Planned Features 👀</h2>
 
