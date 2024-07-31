@@ -18,20 +18,20 @@
 
 
 ### Integration
-- *Use Any Aniyomi Extension*: Seamlessly integrate and use any Aniyomi extension to access a vast library of anime content.
+- *Use Any Aniyomi Extension:** Seamlessly integrate and use any Aniyomi extension to access a vast library of anime content.
 
 ### Syncing
-- **Progress Syncing**: Keep track of your watching progress by syncing with popular platforms like AniList, MyAnimeList, Shikimori, and more.
+- **Progress Syncing:** Keep track of your watching progress by syncing with popular platforms like AniList, MyAnimeList, Shikimori, and more.
 
 ### Community
-- **Comments**: Leave and read comments to engage with other anime fans and share your thoughts.
+- **Comments:** Leave and read comments to engage with other anime fans and share your thoughts.
 
 ### Customization
-- **Tag Filtering**: Customize your experience by filtering out tags you don't like, such as mecha, across the entire app.
+- **Tag Filtering:** Customize your experience by filtering out tags you don't like, such as mecha, across the entire app.
 - **Blacklist Unwanted Media**: Ensure your watchlist is tailored to your preferences by blacklisting unwanted media.
 
 ### Localization
-- **Multilingual Support**: Enjoy the app in your preferred language with extensive translation options.
+- **Multilingual Support:** Enjoy the app in your preferred language with extensive translation options.
 
 ## Planned Features 👀
 
