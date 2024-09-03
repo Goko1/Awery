@@ -2,7 +2,8 @@
    <img src="https://raw.githubusercontent.com/MrBoomDeveloper/Awery/master/docs/app_icon.png" alt="Awery App Icon" width="175px">
 </p>
 
-<h1 align="center">Awery - The Ultimate Mobile Anime Experience</h1>
+<h1 align="center">Awery</h1>
+<h1 align="center">The Ultimate Mobile Anime Experience</h1>
 
 <p align="center">
    Imagine the perfect anime app where you can customize everything, explore tons of features, and enjoy a <b><i>stylish</i></b> design. It's all here with Awery!
