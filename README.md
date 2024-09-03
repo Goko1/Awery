@@ -66,7 +66,7 @@ Awery is your go-to mobile app for a personalized anime experience. From seamles
 To get started with Awery, follow these steps:
 
 1. **Choose Your Version**:
-   - **Alpha Version**: Get early access to the newest features that are still in development. Perfect for users who love to experiment and don't mind occasional bugs. [Download the Alpha APK](https://github.com/MrBoomDeveloper/Awery).
+   - **Alpha Version**: Get early access to the newest features that are still in development. Perfect for users who love to experiment and don't mind occasional bugs. [Download the Alpha APK](https://github.com/Shebyyy/Awery-updater/releases).
    - **Beta Version**: Access new features that are more polished than the Alpha version. Ideal for users who want a balance between new functionalities and stability. [Download the Beta APK](https://github.com/MrBoomDeveloper/Awery/releases).
    - **Stable Version**: For the best experience with fully tested and reliable features, choose the stable release. Recommended for all users. [Download the Stable APK](https://github.com/MrBoomDeveloper/Awery/releases).
 
