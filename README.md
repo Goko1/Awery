@@ -59,13 +59,22 @@ Awery is your go-to mobile app for a personalized anime experience. From seamles
 - **Offline Playback**: Watch your favorite anime offline by downloading episodes.
 - **Update Notifications**: Stay informed about new releases and updates.
 
-## 🛠️ Getting Started
+---
 
-To get started with Awery:
+## 🛠️ Getting Started with Awery
 
-1. **Download** the app from the [GitHub releases page](https://github.com/MrBoomDeveloper/Awery/releases).
-2. **Install** the app on your Android device.
-3. **Join** our community on [Discord](https://discord.com/invite/yspVzD4Kbm) or [Telegram](https://t.me/mrboomdev_awery) for support and updates.
+To get started with Awery, follow these steps:
+
+1. **Choose Your Version**:
+   - **Alpha Version**: Get early access to the newest features that are still in development. Perfect for users who love to experiment and don't mind occasional bugs. [Download the Alpha APK](https://github.com/MrBoomDeveloper/Awery).
+   - **Beta Version**: Access new features that are more polished than the Alpha version. Ideal for users who want a balance between new functionalities and stability. [Download the Beta APK](https://github.com/MrBoomDeveloper/Awery/releases).
+   - **Stable Version**: For the best experience with fully tested and reliable features, choose the stable release. Recommended for all users. [Download the Stable APK](https://github.com/MrBoomDeveloper/Awery/releases).
+
+2. **Install the App**: Once you've downloaded your preferred version, install the APK on your Android device. Be sure to enable installations from unknown sources in your device settings.
+
+3. **Join Our Community**: Stay updated and connect with other users by joining our community on [Discord](https://discord.com/invite/yspVzD4Kbm) or [Telegram](https://t.me/mrboomdev_awery). Get support, share your feedback, and be part of the conversation!
+
+---
 
 ## 🤝 Contribution
 
