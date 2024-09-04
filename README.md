@@ -92,12 +92,6 @@ We welcome all kinds of contributions, from translations to new features.
 
 ---
 
-### 📄 License
-
-This project is licensed under the MIT License. See the [LICENSE](https://github.com/MrBoomDeveloper/Awery/blob/master/LICENSE) file for more details.
-
----
-
 ### 🌍 Connect with Us
 
 - **Discord**: [Join our Discord community](https://discord.com/invite/yspVzD4Kbm)
