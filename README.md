@@ -78,7 +78,7 @@ To get started with Awery, follow these steps:
 
 ## 🤝 Contribution
 
-We welcome all kinds of contributions, from translations to new features. Check out our [contribution guidelines](https://github.com/MrBoomDeveloper/Awery/blob/master/CONTRIBUTING.md) to get started.
+We welcome all kinds of contributions, from translations to new features.
 
 <p align="center">
    <a href="https://hosted.weblate.org/engage/awery"><img src="https://hosted.weblate.org/widget/awery/multi-auto.svg" alt="Translation status" /></a>
